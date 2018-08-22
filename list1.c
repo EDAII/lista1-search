@@ -8,6 +8,7 @@
 
 #define REPEATED 1
 #define NREPEATED 0
+#define GNUPLOT "gnuplot -persist"
 
 void generateVector(int tam, int *matriz);
 int searchValue(int value, int *matriz, int tam);
@@ -16,7 +17,16 @@ void swap(int *matriz, int a, int b);
 int main()
 {
 	int tam, value, index, *matriz = NULL;
+    FILE *gp;
+    gp = popen(GNUPLOT, "w");
+    if (gp == NULL) {
+        printf("Erro ao abrir pipe para o GNU plot.\n"
+            "Instale com 'sudo apt-get install gnuplot'\n");
+        exit(0);
+    }
 
+    FILE *fp;
+    fp = fopen("dados.txt", "w+");
 
 	printf("Tamanho do vetor gerado: ");
 	scanf("%i", &tam);
@@ -38,17 +48,17 @@ int main()
         index = searchValue(value, matriz, tam);
         t = clock() - t;
         double time_taken = ((double)t)/CLOCKS_PER_SEC; // in seconds
-
         if(value!=0) {
             if(index==tam) {
                 printf("\n%d não está presente no vetor.\n", value);
             } else {
                 printf("\n%d é a posição do vetor em que o valor %d se encontra.\n", index, value);
+                fprintf(fp, "%lf\t%d\n",t, index);
             }
             printf("\nExecutado em %lf (s)..\n",time_taken);
         }
     } while(value!=0);
-
+    fprintf(gp, "plot 'dados.txt'\n");
 	return 0;
 }
 
